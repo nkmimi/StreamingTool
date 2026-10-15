@@ -3,6 +3,7 @@ import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { execFileSync } from 'node:child_process';
 import { runDownload, DEFAULT_OUT } from './downloader.js';
 import { DownloadControl } from './control.js';
 import * as caddy from './server.js';
@@ -14,6 +15,17 @@ const PORT = parseInt(process.env.PORT || '8787', 10);
 // restrict to this machine only (loopback).
 const ALLOW_LAN = !/^(0|false|no|off)$/i.test(process.env.ALLOW_LAN || '');
 const HOST = process.env.HOST || (ALLOW_LAN ? '0.0.0.0' : '127.0.0.1');
+
+/** Short git commit hash of the running code (+ "-dirty" if uncommitted changes), or "unknown". */
+function gitCommit() {
+  const git = (...args) => execFileSync('git', args, { cwd: __dirname, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim();
+  try {
+    const hash = git('rev-parse', '--short', 'HEAD');
+    return git('status', '--porcelain') ? `${hash}-dirty` : hash;
+  } catch {
+    return 'unknown';
+  }
+}
 
 /** One active job at a time; kept in memory. */
 let currentJob = null;
@@ -803,6 +815,7 @@ const server = http.createServer(async (req, res) => {
 server.listen(PORT, HOST, () => {
   const shown = HOST === '0.0.0.0' ? '127.0.0.1' : HOST;
   console.log(`StreamGrab web UI → http://${shown}:${PORT}`);
+  console.log(`Commit: ${gitCommit()}`);
   if (ALLOW_LAN) {
     console.log(`LAN access ENABLED (bound to 0.0.0.0). Only private/LAN addresses may connect.`);
   } else {
