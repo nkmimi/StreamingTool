@@ -1,0 +1,22 @@
+{
+  "name": "streamgrab",
+  "version": "1.0.0",
+  "description": "StreamGrab — Playwright-based HLS video downloader with a local web UI",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node src/index.js",
+    "webui": "node src/webui.js",
+    "postinstall": "playwright install chromium"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "cli-progress": "^3.12.0",
+    "ffmpeg-static": "^5.3.0",
+    "m3u8-parser": "^7.2.0",
+    "playwright": "^1.64.0"
+  }
+}
